@@ -1,0 +1,18 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+torch==2.9.1+cpu
+sentence-transformers==2.7.0
+
+langchain==0.2.13
+langchain-openai==0.1.7
+langchain-community==0.2.12
+langchain-text-splitters==0.2.2
+langgraph
+
+chromadb==0.5.4
+python-dotenv==1.2.1
+pypdf==6.4.0
+fastapi==0.123.0
+uvicorn==0.38.0
+
+python-multipart
