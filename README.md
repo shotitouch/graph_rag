@@ -9,13 +9,9 @@ This project demonstrates advanced GenAI engineering including **agentic orchest
 
 ## 📌 Deployment Status
 
-This project currently runs **locally only**.  
-There is **no hosted instance yet**. Deployment plan:
-
 - Frontend → **Vercel**
-- Backend → **Render / Railway**
-- Persistent Vector DB → Planned
-- Public Demo → Planned
+- Backend → **Render**
+- Public Demo → Live at https://shotitouch-pdf-rag.vercel.app
 
 For now, users must:
 
