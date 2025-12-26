@@ -66,7 +66,6 @@ For now, users must:
 ### Frontend
 - Next.js (TypeScript + React)
 - TailwindCSS
-- Axios
 
 ---
 
