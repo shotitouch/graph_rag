@@ -1,10 +1,14 @@
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 router_prompt = ChatPromptTemplate.from_messages([
-    ("system", "You are an expert at classifying user intent. "
-               "Classify the user's question as either 'conversational' (greetings, small talk, thanks) "
-               "or 'technical' (questions requiring data, facts, or documents). "
-               "Output only 'conversational' or 'technical'."),
+    ("system", "You are an expert intent classifier for a RAG system. "
+               "The user has uploaded documents (PDFs) to a knowledge base. "
+               "Your goal is to decide if the user's question requires searching these documents."
+               "\n\nCLASSIFICATION CRITERIA:"
+               "\n- 'technical': Any question asking for facts, summaries, 'what is this about', "
+               "details from 'the report', 'the project', or 'the uploaded file'."
+               "\n- 'conversational': Greetings, small talk, or meta-comments about the chat itself."
+               "\n\nIf the user refers to 'this', 'it', or 'the project', ASSUME they mean the PDF."),
     ("human", "{question}")
 ])
 
