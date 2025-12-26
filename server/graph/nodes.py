@@ -4,7 +4,7 @@ import asyncio
 from core.retriever import get_reranked_docs
 from core.chain import get_chain, get_rewrite_chain, get_grader_chain, get_hallucination_chain, get_answer_grader_chain, get_router_chain
 from .state import AgentState
-from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.messages import AIMessage, HumanMessage, trim_messages
 
 async def router_node(state: AgentState) -> Dict[str, Any]:
     print("---ROUTING NODE---")
@@ -81,6 +81,16 @@ async def retrieve_node(state: AgentState) -> Dict[str, Any]:
 
     return updates
 
+# reduce memory usage
+trimmer = trim_messages(
+    max_tokens=1000, 
+    strategy="last",
+    token_counter=get_chain(),
+    include_system=True,
+    allow_partial=False,
+    start_on="human",
+)
+
 async def generate_node(state: AgentState) -> Dict[str, Any]:
     """
     Step 2: Generate an answer using the retrieved context.
@@ -89,7 +99,8 @@ async def generate_node(state: AgentState) -> Dict[str, Any]:
     print("---GENERATING---")
     question = state["question"]
     documents = state["documents"]
-    history = state.get("messages", [])
+    full_history = state.get("messages", [])
+    trimmed_history = trimmer.invoke(full_history)
 
     # Format context for the prompt
     context_chunks = []
@@ -104,14 +115,14 @@ async def generate_node(state: AgentState) -> Dict[str, Any]:
     # Run your existing chain
     chain = get_chain()
     generation = await chain.ainvoke({
-        "history": history,
+        "history": trimmed_history,
         "question": question,
         "context": formatted_context
     })
 
     return {
         "messages": [AIMessage(content=generation)], 
-        "generation": generation
+        "generation": generation,
     }
 
 async def rewrite_node(state: AgentState) -> Dict[str, Any]:
@@ -201,7 +212,10 @@ async def answer_grader_node(state: AgentState) -> Dict[str, Any]:
         score = get_binary_score(res)
 
         print(f"---ANSWER UTILITY SCORE: {score}---")
-        return {"is_useful": score}
+        return {
+            "is_useful": score,
+            "documents": [] # memory cleanup
+        }
 
     except Exception as e:
         print(f"CRITICAL ERROR in answer_grader_node: {str(e)}")
