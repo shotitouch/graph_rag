@@ -13,12 +13,6 @@ This project demonstrates advanced GenAI engineering including **agentic orchest
 - Backend → **Render**
 - Public Demo → Live at https://shotitouch-pdf-rag.vercel.app
 
-For now, users must:
-
-1️⃣ Run FastAPI backend locally  
-2️⃣ Run Next.js frontend locally  
-3️⃣ Upload their own PDFs to chat with
-
 ---
 
 ## 🚀 Features
