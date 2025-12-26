@@ -13,15 +13,8 @@ This project currently runs **locally only**.
 There is **no hosted instance yet**. Deployment plan:
 
 - Frontend → **Vercel**
-- Backend → **Render / Railway**
-- Persistent Vector DB → Planned
-- Public Demo → Planned
-
-For now, users must:
-
-1️⃣ Run FastAPI backend locally  
-2️⃣ Run Next.js frontend locally  
-3️⃣ Upload their own PDFs to chat with
+- Backend → **Render**
+- Public Demo → Live at https://shotitouch-pdf-rag.vercel.app
 
 ---
 
@@ -66,7 +59,6 @@ For now, users must:
 ### Frontend
 - Next.js (TypeScript + React)
 - TailwindCSS
-- Axios
 
 ---
 
