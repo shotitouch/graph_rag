@@ -1,7 +1,7 @@
 from langchain_community.vectorstores import Chroma
 from core.embeddings import embeddings
 from config import PERSIST_DIR
-from core.reranker import BGEReranker
+from core.reranker import MiniLMReranker
 
 
 vectorstore = Chroma(
@@ -10,7 +10,7 @@ vectorstore = Chroma(
 )
 
 retriever = vectorstore.as_retriever(search_kwargs={"k": 15})
-reranker = BGEReranker()
+reranker = MiniLMReranker()
 
 async def get_reranked_docs(q):
     docs = await retriever.ainvoke(q)

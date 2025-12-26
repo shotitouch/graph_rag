@@ -32,7 +32,7 @@ export default function ChatPage() {
     setLoading(true);
 
     try {
-      const res = await askQuestion(sessionId, input);
+      const res = await askQuestion(Number(sessionId), input);
       const assistantMessage: ChatMessage = {
         role: "assistant",
         content: res.answer,
