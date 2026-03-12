@@ -14,6 +14,7 @@ This project currently runs **locally only**.
 There is **no hosted instance yet**. Deployment plan:
 
 - Frontend → **Vercel**
+<<<<<<< HEAD
 - Backend → **Render / Railway**
 - Persistent Vector DB → Planned
 - Public Demo → Planned
@@ -28,6 +29,10 @@ For now, users must:
 - Backend → **Render**
 - Public Demo → Live at https://shotitouch-pdf-rag.vercel.app
 >>>>>>> 4a5b59bf5c2316dd883eacf30dbcac37c517e5e9
+=======
+- Backend → **Render**
+- Public Demo → Live at https://shotitouch-pdf-rag.vercel.app
+>>>>>>> 2fc5b64c45462b97038a4c054ac29d62b6fd6f3d
 
 ---
 
@@ -73,9 +78,12 @@ For now, users must:
 - Next.js (TypeScript + React)
 - TailwindCSS
 <<<<<<< HEAD
+<<<<<<< HEAD
 - Axios
 =======
 >>>>>>> 4a5b59bf5c2316dd883eacf30dbcac37c517e5e9
+=======
+>>>>>>> 2fc5b64c45462b97038a4c054ac29d62b6fd6f3d
 
 ---
 
