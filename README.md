@@ -1,31 +1,177 @@
-# 🕸️ Agentic Graph-Based PDF RAG
+# 🕸️ Agentic Graph PDF RAG — LangGraph + FastAPI + Next.js
 
-A high-performance, state-aware retrieval system that leverages **cyclic cognitive architectures** to handle complex document queries. This project moves beyond simple vector search by implementing autonomous loops to verify and refine answers.
+A full-stack **Agentic Retrieval-Augmented Generation (RAG)** application implementing **self-correcting reasoning loops** for high-fidelity document intelligence.  
+Built with **LangGraph**, **FastAPI**, **ChromaDB**, **BGE-Reranker**, and **Next.js**.
 
-## 🚀 Core Features
-* [cite_start]**Two-Stage Retrieval:** Combines **ChromaDB** vector search with a **BGE-Reranker** to ensure the most relevant context is prioritized[cite: 9, 24].
-* [cite_start]**Agentic Orchestration:** Utilizes **LangGraph** (LCEL) to manage stateful loops, allowing the system to self-correct if retrieved data is insufficient[cite: 9, 24].
-* [cite_start]**Asynchronous Backend:** Powered by **FastAPI** to handle real-time streaming and high-concurrency document processing[cite: 24, 25].
-* [cite_start]**Verifiable Citations:** Every response includes direct citations from the source PDF to ensure groundedness and prevent hallucinations[cite: 25].
-
-## 🏗️ Technical Architecture
-The system follows a "Corrective-RAG" (CRAG) pattern:
-1. **Routing:** Incoming queries are analyzed to determine the best retrieval path.
-2. **Retrieval & Grading:** Context is fetched and graded for relevance.
-3. **Knowledge Refinement:** If the grade is low, the agent triggers a query-rewrite loop to find better context.
-4. **Generation:** The LLM synthesizes a final answer only when the "groundedness" threshold is met.
-
-
-
-## 🛠️ Stack
-* [cite_start]**Orchestration:** LangGraph, LangChain [cite: 9]
-* [cite_start]**Embeddings & Ranking:** BGE-Reranker, Transformers [cite: 8, 9, 24]
-* [cite_start]**Vector Store:** ChromaDB [cite: 9, 24]
-* [cite_start]**API:** FastAPI (Asynchronous) [cite: 10, 24]
-* [cite_start]**Frontend:** Next.js with real-time streaming [cite: 20, 25]
-
-## 📊 Performance & Optimization
-[cite_start]The pipeline was optimized through fine-tuning and ablation studies, similar to the methodology used in my NLP research where I achieved a **0.9065 Micro F1** score by optimizing context capture[cite: 27, 28]. This project applies those same principles to ensure high-fidelity retrieval from multi-page PDFs.
+This project demonstrates advanced GenAI engineering including **agentic orchestration**, **multi-path intent routing**, and **two-stage retrieval** to mitigate hallucinations and improve answer reliability.
 
 ---
-[cite_start]**Maintained by [Shotitouch Tuangcharoentip](https://github.com/shotitouch)** *MS in Machine Learning, Stevens Institute of Technology (GPA: 4.0)* [cite: 1, 32]
+
+## 📌 Deployment Status
+
+- Frontend → **Vercel**
+- Backend → **Render**
+- Public Demo → Live at https://shotitouch-pdf-rag.vercel.app
+
+---
+
+## 🚀 Features
+
+### 🤖 Agentic Intelligence
+- LangGraph **stateful loop execution**
+- Self-correction with iterative retrieval
+- Failure & hallucination handling
+- Intent routing for optimal reasoning paths
+
+### 🔍 Smarter Retrieval
+- **Two-Stage Retrieval**
+  - ChromaDB dense retrieval
+  - **BGE Cross-Encoder Reranker**
+- Relevance confidence grading
+- Context validation before generation
+
+### ⚙️ Backend
+- FastAPI with async streaming
+- Structured JSON responses
+- Citation-verified answers
+
+### 🎨 Frontend
+- Modern **Next.js** UI
+- PDF upload support
+- Interactive chat interface
+- TailwindCSS styling
+
+---
+
+## 🧱 Tech Stack
+
+### Backend
+- FastAPI
+- LangGraph + LangChain (LCEL)
+- ChromaDB
+- BGE-Reranker
+- OpenRouter API
+- Python 3.10+
+
+### Frontend
+- Next.js (TypeScript + React)
+- TailwindCSS
+
+---
+
+## 🏗 Architecture Overview
+
+```
+            ┌─────────────────────┐
+            │     Next.js UI      │
+            │ (Bento Grid + Chat) │
+            └──────────┬──────────┘
+                       │
+                       ▼
+            ┌─────────────────────┐
+            │   FastAPI Backend   │
+            │  (Async Streaming)  │
+            └──────────┬──────────┘
+                       │
+        ┌──────────────┴──────────────┐
+        ▼                             ▼
+  Ingest Pipeline              LangGraph Agent
+  - PyPDFLoader                - Intent Router
+  - Recursive Splitter         - Self-Correcting Loop
+  - Embeddings Generation      - Hallucination Grader
+        │                             │
+        ▼                             ▼
+  ┌──────────┐                ┌─────────────────┐
+  │ ChromaDB │◄───────────────┤  BGE-Reranker   │
+  └──────────┘                └─────────────────┘
+```
+
+---
+
+## 📥 Backend Setup (FastAPI)
+
+### 1️⃣ Create virtual environment
+
+```bash
+python -m venv .venv
+source .venv/bin/activate      # Mac/Linux
+.venv\Scripts\activate       # Windows
+```
+
+### 2️⃣ Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3️⃣ Environment variables
+
+Create `.env` in backend root:
+
+```
+OPENROUTER_API_KEY=your_key_here
+```
+
+### 4️⃣ Run backend
+
+```bash
+uvicorn app.main:app --reload
+```
+
+Backend runs at:
+
+👉 http://localhost:8000
+
+---
+
+## 💻 Frontend Setup (Next.js)
+
+### 1️⃣ Install dependencies
+
+```bash
+npm install
+```
+
+### 2️⃣ Environment variables
+
+Create `.env.local` in frontend root:
+
+```
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+### 3️⃣ Run dev server
+
+```bash
+npm run dev
+```
+
+Frontend runs at:
+
+👉 http://localhost:3000
+
+---
+
+## 🧠 How Agentic RAG Works
+
+1️⃣ User query enters LangGraph **StateGraph**  
+2️⃣ Initial retrieval from **ChromaDB**  
+3️⃣ **BGE-Reranker** refines results  
+4️⃣ Grader checks relevance quality  
+5️⃣ If weak → rewrite query + re-retrieve  
+6️⃣ LLM generates final answer with citations
+
+---
+
+## 👤 Author
+
+**Shotitouch Tuangcharoentip**  
+🎓 MS in Machine Learning, Stevens Institute of Technology (GPA 4.0)  
+💻 5.5+ years Backend & Full‑Stack Engineering  
+🚀 Focus: Agentic GenAI • Adversarial ML • Enterprise Systems
+
+---
+
+## 📜 License
+
+MIT License
