@@ -17,7 +17,7 @@ There is **no hosted instance yet**. Deployment plan:
 <<<<<<< HEAD
 - Backend → **Render / Railway**
 - Persistent Vector DB → Planned
-- Public Demo → Planned
+- Public Demo
 
 For now, users must:
 
@@ -137,7 +137,8 @@ pip install -r requirements.txt
 Create `.env` in backend root:
 
 ```
-OPENROUTER_API_KEY=your_key_here
+OPENAI_API_KEY=your_key_here
+PERSIST_DIR=./chroma_db
 ```
 
 ### 4️⃣ Run backend
