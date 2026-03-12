@@ -4,7 +4,8 @@ import asyncio
 from core.retriever import get_reranked_docs
 from core.chain import get_chain, get_rewrite_chain, get_grader_chain, get_hallucination_chain, get_answer_grader_chain, get_router_chain
 from .state import AgentState
-from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.messages import AIMessage, HumanMessage, trim_messages
+from core.llm import llm
 
 async def router_node(state: AgentState) -> Dict[str, Any]:
     print("---ROUTING NODE---")
@@ -87,32 +88,40 @@ async def generate_node(state: AgentState) -> Dict[str, Any]:
     Uses the logic from chain.py and prompt.py.
     """
     print("---GENERATING---")
-    question = state["question"]
-    documents = state["documents"]
-    history = state.get("messages", [])
 
-    # Format context for the prompt
-    context_chunks = []
-    for d in documents:
-        file = d.metadata.get("file") or d.metadata.get("source")
-        page = d.metadata.get("page")
-        citation_tag = f"[Source: {file}, page: {page}]"
-        context_chunks.append(f"{citation_tag}\n{d.page_content}")
-    
-    formatted_context = "\n\n---\n\n".join(context_chunks)
+    try:
+        question = state.get("question")
+        documents = state.get("documents", [])
+        full_history = state.get("messages", [])
+        trimmed_history = trimmed_history = full_history[-6:] if full_history else [] # simple limit history len, reduce memory usage
+        print(trimmed_history)
+        # Format context for the prompt
+        context_chunks = []
+        for d in documents:
+            file = d.metadata.get("file") or d.metadata.get("source")
+            page = d.metadata.get("page")
+            citation_tag = f"[Source: {file}, page: {page}]"
+            context_chunks.append(f"{citation_tag}\n{d.page_content}")
+        
+        formatted_context = "\n\n---\n\n".join(context_chunks) if context_chunks else "No documents found. Answer conversationally."
 
-    # Run your existing chain
-    chain = get_chain()
-    generation = await chain.ainvoke({
-        "history": history,
-        "question": question,
-        "context": formatted_context
-    })
+        # Run your existing chain
+        chain = get_chain()
+        generation = await chain.ainvoke({
+            "history": trimmed_history,
+            "question": question,
+            "context": formatted_context
+        })
 
-    return {
-        "messages": [AIMessage(content=generation)], 
-        "generation": generation
-    }
+        return {
+            "messages": [AIMessage(content=generation)], 
+            "generation": generation,
+        }
+    except Exception as e:
+        print(f"CRITICAL ERROR in generate_node: {str(e)}")
+        # This will print the actual error (e.g., API Key missing, Rate Limit, etc.)
+        raise e
+
 
 async def rewrite_node(state: AgentState) -> Dict[str, Any]:
     print("---REWRITING QUERY---")
@@ -185,9 +194,9 @@ async def answer_grader_node(state: AgentState) -> Dict[str, Any]:
     generation = state["generation"]
     question = state["question"]
 
-    if not generation:
+    if not generation or not question:
         print("---NO GENERATION FOUND TO GRADE---")
-        return {"is_useful": "no"}
+        return {"is_useful": "no", "documents": []}
     
     try:
         # 1. Run the Answer Grader Chain
@@ -201,9 +210,12 @@ async def answer_grader_node(state: AgentState) -> Dict[str, Any]:
         score = get_binary_score(res)
 
         print(f"---ANSWER UTILITY SCORE: {score}---")
-        return {"is_useful": score}
+        return {
+            "is_useful": score,
+            "documents": [] # memory cleanup
+        }
 
     except Exception as e:
         print(f"CRITICAL ERROR in answer_grader_node: {str(e)}")
         # This will print the actual error (e.g., API Key missing, Rate Limit, etc.)
-        raise e
+        return {"is_useful": "no", "documents": []}

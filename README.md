@@ -9,6 +9,7 @@ This project demonstrates advanced GenAI engineering including **agentic orchest
 
 ## 📌 Deployment Status
 
+<<<<<<< HEAD
 This project currently runs **locally only**.  
 There is **no hosted instance yet**. Deployment plan:
 
@@ -22,6 +23,11 @@ For now, users must:
 1️⃣ Run FastAPI backend locally  
 2️⃣ Run Next.js frontend locally  
 3️⃣ Upload their own PDFs to chat with
+=======
+- Frontend → **Vercel**
+- Backend → **Render**
+- Public Demo → Live at https://shotitouch-pdf-rag.vercel.app
+>>>>>>> 4a5b59bf5c2316dd883eacf30dbcac37c517e5e9
 
 ---
 
@@ -66,7 +72,10 @@ For now, users must:
 ### Frontend
 - Next.js (TypeScript + React)
 - TailwindCSS
+<<<<<<< HEAD
 - Axios
+=======
+>>>>>>> 4a5b59bf5c2316dd883eacf30dbcac37c517e5e9
 
 ---
 

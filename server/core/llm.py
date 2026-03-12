@@ -1,10 +1,9 @@
 from langchain_openai import ChatOpenAI
-from config import OPENROUTER_API_KEY
+from config import OPENAI_API_KEY, OPENAI_CHAT_MODEL
 
 llm = ChatOpenAI(
-    api_key=OPENROUTER_API_KEY,
-    base_url="https://openrouter.ai/api/v1",
-    model="openai/gpt-4.1-mini",
+    api_key=OPENAI_API_KEY,
+    model=OPENAI_CHAT_MODEL,
     temperature=0,
     max_tokens=300,
 )

@@ -18,8 +18,10 @@ server/.env
 # Vector DB persistence
 server/vectorstore/
 server/chroma/
+server/chroma_db/
 vectorstore/
 chroma/
+chroma_db/
 
 # Temporary files
 *.tmp

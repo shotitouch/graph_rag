@@ -1,7 +1,7 @@
 from langchain_community.vectorstores import Chroma
 from core.embeddings import embeddings
 from config import PERSIST_DIR
-from core.reranker import BGEReranker
+from core.reranker import MiniLMReranker
 
 
 vectorstore = Chroma(
@@ -9,11 +9,20 @@ vectorstore = Chroma(
     embedding_function=embeddings
 )
 
-retriever = vectorstore.as_retriever(search_kwargs={"k": 15})
-reranker = BGEReranker()
+retriever = vectorstore.as_retriever(search_kwargs={"k": 5}) # reduce memory usage
+reranker = MiniLMReranker()
 
 async def get_reranked_docs(q):
     docs = await retriever.ainvoke(q)
+    print(f"---RERANK STEP: RETRIEVED {len(docs)} DOCS---")
     reranked_docs = await reranker.rerank(q, docs)
+    print(f"---RERANK STATUS: {reranker.status.upper()}---")
 
-    return reranked_docs[:3]
+    final_docs = reranked_docs[:3]
+    print(f"---RERANK STEP: RETURNING {len(final_docs)} DOCS---")
+
+    # reduce memory usage
+    del docs
+    del reranked_docs
+
+    return final_docs
