@@ -1,4 +1,4 @@
-from typing import List, TypedDict, Annotated, Optional
+from typing import Any, List, TypedDict, Annotated
 from langchain_core.documents import Document
 from langgraph.graph.message import add_messages, AnyMessage
 
@@ -12,3 +12,4 @@ class AgentState(TypedDict):
     retry_count: int
     is_grounded: str  # 'yes' or 'no'
     is_useful: str    # 'yes' or 'no'
+    sources: List[dict[str, Any]]

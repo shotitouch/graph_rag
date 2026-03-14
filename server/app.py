@@ -4,8 +4,13 @@ from router.ask import router as ask_router
 from router.health import router as health_router
 from router.ingest import router as ingest_router
 from fastapi.middleware.cors import CORSMiddleware
+from utils.logger import configure_logging, get_logger
+
+configure_logging()
+logger = get_logger(__name__)
 
 app = FastAPI(title="Agentic RAG", version="1.0.0")
+logger.info("event=api_startup status=initialized version=1.0.0")
 
 app.add_middleware(
     CORSMiddleware,

@@ -13,12 +13,12 @@ export async function ingestPDF(file: File) {
   return res.json();
 }
 
-export async function askQuestion(sessionId: number, question: string) {
+export async function askQuestion(sessionId: string, question: string) {
   const res = await fetch(`${API_BASE}/ask`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      session_id: sessionId,
+      thread_id: sessionId,
       question
     }),
     cache: "no-store",

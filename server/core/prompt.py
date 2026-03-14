@@ -18,7 +18,8 @@ prompt = ChatPromptTemplate.from_messages([
         "You are a helpful assistant. "
         "If context is provided, use it to answer the question accurately. "
         "If no useful context exists or context is empty, answer normally. "
-        "For every part of your answer, connect it to one of the citations. "
+        "When context is provided, cite factual claims with the source IDs exactly as given, for example [S1] or [S2]. "
+        "Do not invent citation IDs. "
         "If context exists but does not contain the answer, reply: 'Not found in context'."
     ),
     MessagesPlaceholder(variable_name="history"),

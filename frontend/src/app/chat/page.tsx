@@ -8,6 +8,12 @@ import { ArrowLeft, Send, Bot, User, Sparkles, Upload } from "lucide-react";
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
+  sources?: Array<{
+    id: string;
+    source: string;
+    page: number | null;
+    chunk_id?: string | null;
+  }>;
 }
 
 export default function ChatPage() {
@@ -32,10 +38,11 @@ export default function ChatPage() {
     setLoading(true);
 
     try {
-      const res = await askQuestion(Number(sessionId), input);
+      const res = await askQuestion(sessionId, input);
       const assistantMessage: ChatMessage = {
         role: "assistant",
         content: res.answer,
+        sources: res.sources ?? [],
       };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
@@ -101,7 +108,13 @@ export default function ChatPage() {
                 ? "bg-blue-600 text-white rounded-tr-none" 
                 : "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-tl-none"}`}
             >
-              {m.content}
+              <div>{m.content}</div>
+              {m.role === "assistant" && m.sources && m.sources.length > 0 && (
+                <div className="mt-3 border-t border-zinc-200 pt-3 text-xs text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
+                  Sources:{" "}
+                  {m.sources.map((source) => `${source.id}: ${source.source}${source.page ? ` p.${source.page}` : ""}`).join(" | ")}
+                </div>
+              )}
             </div>
           </div>
         ))}
