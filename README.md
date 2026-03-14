@@ -17,22 +17,17 @@ There is **no hosted instance yet**. Deployment plan:
 <<<<<<< HEAD
 - Backend → **Render / Railway**
 - Persistent Vector DB → Planned
-- Public Demo → Planned
+- Public Demo
 
 For now, users must:
 
 1️⃣ Run FastAPI backend locally  
 2️⃣ Run Next.js frontend locally  
 3️⃣ Upload their own PDFs to chat with
-=======
 - Frontend → **Vercel**
 - Backend → **Render**
 - Public Demo → Live at https://shotitouch-pdf-rag.vercel.app
->>>>>>> 4a5b59bf5c2316dd883eacf30dbcac37c517e5e9
-=======
-- Backend → **Render**
-- Public Demo → Live at https://shotitouch-pdf-rag.vercel.app
->>>>>>> 2fc5b64c45462b97038a4c054ac29d62b6fd6f3d
+
 
 ---
 
@@ -80,11 +75,6 @@ For now, users must:
 <<<<<<< HEAD
 <<<<<<< HEAD
 - Axios
-=======
->>>>>>> 4a5b59bf5c2316dd883eacf30dbcac37c517e5e9
-=======
->>>>>>> 2fc5b64c45462b97038a4c054ac29d62b6fd6f3d
-
 ---
 
 ## 🏗 Architecture Overview
@@ -137,7 +127,8 @@ pip install -r requirements.txt
 Create `.env` in backend root:
 
 ```
-OPENROUTER_API_KEY=your_key_here
+OPENAI_API_KEY=your_key_here
+PERSIST_DIR=./chroma_db
 ```
 
 ### 4️⃣ Run backend
