@@ -1,4 +1,5 @@
 import re
+import uuid
 
 from fastapi import APIRouter, HTTPException
 from schemas import ChatRequest
@@ -15,6 +16,8 @@ CITATION_PATTERN = re.compile(r"\[(S\d+)\]")
 def build_initial_state(question: str) -> dict:
     return {
         "question": question,
+        "thread_id": "",
+        "request_id": "",
         "documents": [],
         "generation": "",
         "retry_count": 0,
@@ -47,8 +50,11 @@ def build_safe_response(question: str, retry_count: int, failure_reason: str, so
 @router.post("/")
 async def ask_question(request: ChatRequest):
     try:
+        request_id = uuid.uuid4().hex[:8]
         initial_state = build_initial_state(request.question)
-        logger.info("event=request_received route=ask thread_id=%s", request.thread_id)
+        initial_state["thread_id"] = request.thread_id
+        initial_state["request_id"] = request_id
+        logger.info("event=request_received route=ask thread_id=%s request_id=%s", request.thread_id, request_id)
         
 
         
@@ -63,6 +69,8 @@ async def ask_question(request: ChatRequest):
             # but the 'messages' will automatically merge because of your State definition.
             inputs = {
                 "question": request.question,
+                "thread_id": request.thread_id,
+                "request_id": request_id,
                 "retry_count": 0,    # Reset!
                 "is_grounded": "",   # Reset!
                 "is_useful": "",     # Reset!
@@ -83,7 +91,7 @@ async def ask_question(request: ChatRequest):
         is_useful = final_state.get("is_useful")
 
         if not answer:
-            logger.warning("event=request_abstained route=ask thread_id=%s reason=empty_generation retry_count=%s", request.thread_id, retries)
+            logger.warning("event=request_abstained route=ask thread_id=%s request_id=%s reason=empty_generation retry_count=%s", request.thread_id, request_id, retries)
             return build_safe_response(
                 request.question,
                 retries,
@@ -93,14 +101,14 @@ async def ask_question(request: ChatRequest):
         if sources:
             citations_valid, invalid_ids = validate_citations(answer, sources)
             if not citations_valid:
-                logger.warning("event=citation_validation_failed route=ask thread_id=%s invalid_ids=%s retry_count=%s", request.thread_id, ",".join(invalid_ids), retries)
+                logger.warning("event=citation_validation_failed route=ask thread_id=%s request_id=%s invalid_ids=%s retry_count=%s", request.thread_id, request_id, ",".join(invalid_ids), retries)
                 return build_safe_response(
                     request.question,
                     retries,
                     f"invalid_citations:{','.join(invalid_ids)}",
                 )
         elif is_useful == "yes" and is_grounded == "yes" and answer != NOT_FOUND_MESSAGE:
-            logger.warning("event=request_abstained route=ask thread_id=%s reason=missing_sources retry_count=%s", request.thread_id, retries)
+            logger.warning("event=request_abstained route=ask thread_id=%s request_id=%s reason=missing_sources retry_count=%s", request.thread_id, request_id, retries)
             return build_safe_response(
                 request.question,
                 retries,
@@ -108,7 +116,7 @@ async def ask_question(request: ChatRequest):
             )
 
         if is_grounded == "no":
-            logger.warning("event=request_abstained route=ask thread_id=%s reason=hallucination_detected retry_count=%s", request.thread_id, retries)
+            logger.warning("event=request_abstained route=ask thread_id=%s request_id=%s reason=hallucination_detected retry_count=%s", request.thread_id, request_id, retries)
             return build_safe_response(
                 request.question,
                 retries,
@@ -116,7 +124,7 @@ async def ask_question(request: ChatRequest):
             )
 
         if is_useful == "no":
-            logger.warning("event=request_abstained route=ask thread_id=%s reason=answer_not_useful retry_count=%s", request.thread_id, retries)
+            logger.warning("event=request_abstained route=ask thread_id=%s request_id=%s reason=answer_not_useful retry_count=%s", request.thread_id, request_id, retries)
             return build_safe_response(
                 request.question,
                 retries,
@@ -127,6 +135,7 @@ async def ask_question(request: ChatRequest):
         logger.info(
             "event=request_completed route=ask thread_id=%s status=answered retry_count=%s sources_count=%s",
             request.thread_id,
+            request_id,
             retries,
             len(sources),
         )
@@ -135,6 +144,7 @@ async def ask_question(request: ChatRequest):
             "answer": answer,
             "sources": sources,
             "metadata": {
+                "request_id": request_id,
                 "retries": retries,
                 "sources_count": len(sources),
                 "status": "answered",
@@ -143,5 +153,5 @@ async def ask_question(request: ChatRequest):
         
     except Exception as e:
         # Professional error handling
-        logger.exception("event=request_failed route=ask thread_id=%s", request.thread_id)
+        logger.exception("event=request_failed route=ask thread_id=%s request_id=%s", request.thread_id, request_id)
         raise HTTPException(status_code=500, detail=str(e))

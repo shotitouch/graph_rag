@@ -1,6 +1,7 @@
 # graph/nodes.py
 from typing import Any, Dict
 import asyncio
+import time
 from core.retriever import get_reranked_docs
 from core.chain import get_chain, get_rewrite_chain, get_grader_chain, get_hallucination_chain, get_answer_grader_chain, get_router_chain
 from .state import AgentState
@@ -9,6 +10,12 @@ from core.llm import llm
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
+
+def get_trace_fields(state: AgentState) -> tuple[str, str]:
+    return state.get("thread_id", "unknown"), state.get("request_id", "unknown")
+
+def duration_ms(start_time: float) -> float:
+    return round((time.perf_counter() - start_time) * 1000, 2)
 
 def build_source_entry(index: int, document) -> dict[str, Any]:
     source = document.metadata.get("file") or document.metadata.get("source") or "unknown"
@@ -24,7 +31,9 @@ def build_source_entry(index: int, document) -> dict[str, Any]:
 
 async def router_node(state: AgentState) -> Dict[str, Any]:
     question = state["question"]
-    logger.info("event=node_started node=route_intent")
+    thread_id, request_id = get_trace_fields(state)
+    start_time = time.perf_counter()
+    logger.info("event=node_started node=route_intent thread_id=%s request_id=%s", thread_id, request_id)
     
     router_chain = get_router_chain()
     res = await router_chain.ainvoke({"question": question})
@@ -37,7 +46,7 @@ async def router_node(state: AgentState) -> Dict[str, Any]:
     if decision not in ["conversational", "technical"]:
         decision = "technical"
         
-    logger.info("event=node_completed node=route_intent intent=%s", decision)
+    logger.info("event=node_completed node=route_intent thread_id=%s request_id=%s intent=%s duration_ms=%s", thread_id, request_id, decision, duration_ms(start_time))
     return {"intent": decision}
 
 def get_binary_score(res) -> str:
@@ -53,7 +62,9 @@ def get_binary_score(res) -> str:
 async def grade_documents_node(state: AgentState) -> Dict[str, Any]:
     question = state["question"]
     documents = state["documents"]
-    logger.info("event=node_started node=grade_docs docs_count=%s", len(documents))
+    thread_id, request_id = get_trace_fields(state)
+    start_time = time.perf_counter()
+    logger.info("event=node_started node=grade_docs thread_id=%s request_id=%s docs_count=%s", thread_id, request_id, len(documents))
     grader_chain = get_grader_chain()
 
     try:
@@ -68,11 +79,11 @@ async def grade_documents_node(state: AgentState) -> Dict[str, Any]:
         ]
 
         # Return the filtered list of documents
-        logger.info("event=node_completed node=grade_docs docs_in=%s relevant_docs=%s", len(documents), len(relevant_docs))
+        logger.info("event=node_completed node=grade_docs thread_id=%s request_id=%s docs_in=%s relevant_docs=%s duration_ms=%s", thread_id, request_id, len(documents), len(relevant_docs), duration_ms(start_time))
         return {"documents": relevant_docs}
     
     except Exception as e:
-        logger.exception("event=node_failed node=grade_docs")
+        logger.exception("event=node_failed node=grade_docs thread_id=%s request_id=%s duration_ms=%s", thread_id, request_id, duration_ms(start_time))
         # This will print the actual error (e.g., API Key missing, Rate Limit, etc.)
         raise e
 
@@ -83,7 +94,9 @@ async def retrieve_node(state: AgentState) -> Dict[str, Any]:
     """
     question = state["question"]
     messages = state.get("messages", [])
-    logger.info("event=node_started node=retrieve")
+    thread_id, request_id = get_trace_fields(state)
+    start_time = time.perf_counter()
+    logger.info("event=node_started node=retrieve thread_id=%s request_id=%s", thread_id, request_id)
 
     updates = {}
 
@@ -93,7 +106,7 @@ async def retrieve_node(state: AgentState) -> Dict[str, Any]:
     # Use your existing reranking logic
     documents = await get_reranked_docs(question)
     updates["documents"] = documents
-    logger.info("event=node_completed node=retrieve docs_count=%s", len(documents))
+    logger.info("event=node_completed node=retrieve thread_id=%s request_id=%s docs_count=%s duration_ms=%s", thread_id, request_id, len(documents), duration_ms(start_time))
 
     return updates
 
@@ -102,7 +115,9 @@ async def generate_node(state: AgentState) -> Dict[str, Any]:
     Step 2: Generate an answer using the retrieved context.
     Uses the logic from chain.py and prompt.py.
     """
-    logger.info("event=node_started node=generate")
+    thread_id, request_id = get_trace_fields(state)
+    start_time = time.perf_counter()
+    logger.info("event=node_started node=generate thread_id=%s request_id=%s", thread_id, request_id)
 
     try:
         question = state.get("question")
@@ -128,13 +143,14 @@ async def generate_node(state: AgentState) -> Dict[str, Any]:
             "context": formatted_context
         })
 
+        logger.info("event=node_completed node=generate thread_id=%s request_id=%s sources_count=%s duration_ms=%s", thread_id, request_id, len(sources), duration_ms(start_time))
         return {
             "messages": [AIMessage(content=generation)], 
             "generation": generation,
             "sources": sources,
         }
     except Exception as e:
-        logger.exception("event=node_failed node=generate")
+        logger.exception("event=node_failed node=generate thread_id=%s request_id=%s duration_ms=%s", thread_id, request_id, duration_ms(start_time))
         # This will print the actual error (e.g., API Key missing, Rate Limit, etc.)
         raise e
 
@@ -143,6 +159,8 @@ async def rewrite_node(state: AgentState) -> Dict[str, Any]:
     question = state["question"]
     history = state.get("messages", [])
     current_retry = state.get("retry_count", 0)
+    thread_id, request_id = get_trace_fields(state)
+    start_time = time.perf_counter()
     is_grounded = state.get("is_grounded")
     is_useful = state.get("is_useful")
     documents = state.get("documents", [])
@@ -152,7 +170,7 @@ async def rewrite_node(state: AgentState) -> Dict[str, Any]:
         reason = "The previous answer was a hallucination; it wasn't supported by the facts found."
     elif documents and is_useful == "no":
         reason = "The previous answer didn't sufficiently answer the user's specific question."
-    logger.warning("event=node_started node=rewrite retry_count=%s reason=%s", current_retry, reason)
+    logger.warning("event=node_started node=rewrite thread_id=%s request_id=%s retry_count=%s reason=%s", thread_id, request_id, current_retry, reason)
 
     # 1. The Rewrite Logic
     rewriter = get_rewrite_chain()
@@ -162,7 +180,7 @@ async def rewrite_node(state: AgentState) -> Dict[str, Any]:
         "reason": reason
     })
 
-    logger.info("event=node_completed node=rewrite retry_count=%s", current_retry + 1)
+    logger.info("event=node_completed node=rewrite thread_id=%s request_id=%s retry_count=%s duration_ms=%s", thread_id, request_id, current_retry + 1, duration_ms(start_time))
 
     # 2. Return the new question AND increment the retry count
     return {
@@ -181,10 +199,12 @@ async def rewrite_node(state: AgentState) -> Dict[str, Any]:
 async def hallucination_grader_node(state: AgentState) -> Dict[str, Any]:
     generation = state["generation"]
     documents = state["documents"]
-    logger.info("event=node_started node=grade_hallucination docs_count=%s", len(documents))
+    thread_id, request_id = get_trace_fields(state)
+    start_time = time.perf_counter()
+    logger.info("event=node_started node=grade_hallucination thread_id=%s request_id=%s docs_count=%s", thread_id, request_id, len(documents))
 
     if not documents:
-        logger.warning("event=node_completed node=grade_hallucination outcome=skipped_no_documents")
+        logger.warning("event=node_completed node=grade_hallucination thread_id=%s request_id=%s outcome=skipped_no_documents duration_ms=%s", thread_id, request_id, duration_ms(start_time))
         return {"is_grounded": "yes"}
     
     # 1. Prepare the context
@@ -201,16 +221,18 @@ async def hallucination_grader_node(state: AgentState) -> Dict[str, Any]:
     score = get_binary_score(res)
 
 
-    logger.info("event=node_completed node=grade_hallucination grounded=%s", score.lower())
+    logger.info("event=node_completed node=grade_hallucination thread_id=%s request_id=%s grounded=%s duration_ms=%s", thread_id, request_id, score.lower(), duration_ms(start_time))
     return {"is_grounded": score.lower()}
 
 async def answer_grader_node(state: AgentState) -> Dict[str, Any]:
     generation = state["generation"]
     question = state["question"]
-    logger.info("event=node_started node=grade_answer")
+    thread_id, request_id = get_trace_fields(state)
+    start_time = time.perf_counter()
+    logger.info("event=node_started node=grade_answer thread_id=%s request_id=%s", thread_id, request_id)
 
     if not generation or not question:
-        logger.warning("event=node_completed node=grade_answer outcome=missing_generation")
+        logger.warning("event=node_completed node=grade_answer thread_id=%s request_id=%s outcome=missing_generation duration_ms=%s", thread_id, request_id, duration_ms(start_time))
         return {"is_useful": "no", "documents": []}
     
     try:
@@ -224,13 +246,13 @@ async def answer_grader_node(state: AgentState) -> Dict[str, Any]:
 
         score = get_binary_score(res)
 
-        logger.info("event=node_completed node=grade_answer useful=%s", score)
+        logger.info("event=node_completed node=grade_answer thread_id=%s request_id=%s useful=%s duration_ms=%s", thread_id, request_id, score, duration_ms(start_time))
         return {
             "is_useful": score,
             "documents": [] # memory cleanup
         }
 
     except Exception as e:
-        logger.exception("event=node_failed node=grade_answer")
+        logger.exception("event=node_failed node=grade_answer thread_id=%s request_id=%s duration_ms=%s", thread_id, request_id, duration_ms(start_time))
         # This will print the actual error (e.g., API Key missing, Rate Limit, etc.)
         return {"is_useful": "no", "documents": []}
