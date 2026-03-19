@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, FileText, MessageSquare, Database, Cpu, Layout, User } from "lucide-react";
+import { ArrowRight, FileText, Database, Cpu, User } from "lucide-react";
 
 export default function Home() {
   return (
@@ -82,7 +82,7 @@ export default function Home() {
             </div>
             <h3 className="text-xl font-bold mb-2 text-zinc-900 dark:text-zinc-100">Shotitouch T.</h3>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
-              <strong>ML Graduate Student at Stevens (GPA 4.0)</strong> and former <strong>Full-Stack Co-founder</strong> with 5.5+ years of experience[cite: 4, 5, 32]. 
+              <strong>ML Graduate Student at Stevens (GPA 4.0)</strong> and former <strong>Full-Stack Co-founder</strong> with 5.5+ years of experience. 
               I specialize in architecting <strong>agentic GenAI systems</strong> and <strong>adversarial ML</strong>, 
               bridging the gap between scalable enterprise backends and state-of-the-art AI research.
             </p>

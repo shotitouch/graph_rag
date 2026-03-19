@@ -26,11 +26,12 @@ export default function UploadPage() {
     setMessage("Processing document chunks and generating embeddings...");
 
     try {
-      const res = await ingestPDF(file);
+      await ingestPDF(file);
       setStatus("success");
       setMessage("Document successfully indexed. You can now chat with it.");
     } catch (err) {
       setStatus("error");
+      console.error(err)
       setMessage("Server memory limit reached or connection lost. Try a smaller PDF.");
     }
   }
@@ -43,7 +44,7 @@ export default function UploadPage() {
             <ArrowLeft className="w-4 h-4" /> <span>Back to Dashboard</span>
           </Link>
           <h1 className="text-4xl font-extrabold text-gradient">Knowledge Ingestion</h1>
-          <p className="text-zinc-500 mt-2">Upload your PDF to expand the assistant's context.</p>
+          <p className="text-zinc-500 mt-2">Upload your PDF to expand the assistant&apos;s context.</p>
         </div>
         <Link href="/chat" className="flex items-center gap-2 px-5 py-2.5 bg-zinc-100 dark:bg-zinc-800 rounded-xl text-sm font-semibold hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all border border-zinc-200 dark:border-zinc-700">
           <MessageSquare className="w-4 h-4 text-blue-500" /> Resume Chat
