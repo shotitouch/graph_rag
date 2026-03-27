@@ -1,14 +1,33 @@
-from langchain_community.vectorstores import Chroma
+from langchain_qdrant import QdrantVectorStore
+from qdrant_client import QdrantClient
+from qdrant_client.http.models import Distance, VectorParams
 from core.embeddings import embeddings
-from config import PERSIST_DIR
+from config import QDRANT_URL, QDRANT_API_KEY, QDRANT_COLLECTION
 from core.reranker import MiniLMReranker
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-vectorstore = Chroma(
-    persist_directory=PERSIST_DIR,
-    embedding_function=embeddings
+qdrant_client = QdrantClient(
+    url=QDRANT_URL,
+    api_key=QDRANT_API_KEY,
+)
+
+existing_collections = {
+    collection.name for collection in qdrant_client.get_collections().collections
+}
+
+if QDRANT_COLLECTION not in existing_collections:
+    embedding_dimension = len(embeddings.embed_query("dimension probe"))
+    qdrant_client.create_collection(
+        collection_name=QDRANT_COLLECTION,
+        vectors_config=VectorParams(size=embedding_dimension, distance=Distance.COSINE),
+    )
+
+vectorstore = QdrantVectorStore(
+    client=qdrant_client,
+    collection_name=QDRANT_COLLECTION,
+    embedding=embeddings,
 )
 
 retriever = vectorstore.as_retriever(search_kwargs={"k": 5}) # reduce memory usage

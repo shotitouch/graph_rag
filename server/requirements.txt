@@ -7,10 +7,11 @@ sentence-transformers==2.7.0
 langchain==0.2.13
 langchain-openai==0.1.7
 langchain-community==0.2.12
+langchain-qdrant==0.1.4
 langchain-text-splitters==0.2.2
 langgraph
 
-chromadb==0.5.4
+qdrant-client==1.11.1
 python-dotenv==1.2.1
 pypdf==6.4.0
 fastapi==0.123.0

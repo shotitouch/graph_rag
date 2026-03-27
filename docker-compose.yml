@@ -5,11 +5,11 @@ services:
     env_file:
       - ./server/.env
     environment:
-      PERSIST_DIR: /app/chroma_db
+      QDRANT_URL: http://qdrant:6333
     ports:
       - "8000:8000"
-    volumes:
-      - chroma_data:/app/chroma_db
+    depends_on:
+      - qdrant
 
   frontend:
     build:
@@ -23,5 +23,12 @@ services:
     ports:
       - "3000:3000"
 
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
 volumes:
-  chroma_data:
+  qdrant_data:

@@ -1,89 +1,51 @@
-# Agentic Graph PDF RAG
+## Agentic Graph PDF RAG
 
-A full-stack agentic Retrieval-Augmented Generation system for grounded question answering over uploaded PDF documents. The application uses LangGraph orchestration, Chroma retrieval, reranking, iterative query rewriting, and source-aware answer generation.
+A full-stack **agentic Retrieval-Augmented Generation (RAG)** system for grounded question answering over uploaded PDF documents. Built with **LangGraph**, **FastAPI**, **Next.js**, **Qdrant**, and a reranking layer, the system combines retrieval, query rewriting, citation-aware generation, and validation loops to improve answer quality and reduce unsupported responses.
 
-## Architecture
+This project demonstrates practical **AI systems engineering** through **agentic orchestration**, **multi-stage retrieval**, **structured observability**, **CI**, and a **deployment-oriented architecture**. It is designed as a production-minded LLM application rather than a simple chatbot demo, with emphasis on grounded answers, traceable behavior, and reliability-aware control flow.
 
-```text
-Next.js frontend
-  -> FastAPI API
-  -> LangGraph workflow
-  -> retrieval + reranking
-  -> answer generation + citations
-```
+### Features
 
-## Tech Stack
+#### Agentic Intelligence
+- LangGraph-based stateful workflow orchestration
+- Query rewriting and retry loops for weak retrieval cases
+- Hallucination and answer-quality grading
+- Intent-based routing between conversational and document-grounded paths
 
-### Backend
-- Python 3.11
+#### Retrieval and Grounding
+- Dense retrieval over **Qdrant**
+- Cross-encoder reranking for improved context precision
+- Citation-aware answer generation
+- Fail-closed response behavior for unsupported answers
+
+#### Backend
+- FastAPI service for ingestion and question answering
+- Structured JSON responses with sources
+- Structured logging, request tracing, and per-node latency instrumentation
+- Dockerized backend with CI-based validation
+
+#### Frontend
+- Next.js interface for PDF upload and chat
+- Source-aware responses with citations
+- TypeScript-based client application
+
+### Tech Stack
+
+#### Backend
+- Python
 - FastAPI
 - LangGraph
-- LangChain
-- ChromaDB
-- OpenAI-compatible chat and embedding models
-- sentence-transformers reranker
+- LangChain (LCEL)
+- Qdrant
+- Reranker / sentence-transformers
+- OpenAI-compatible chat and embedding APIs
 
-### Frontend
+#### Frontend
 - Next.js
 - TypeScript
 - React
 
-## Environment Variables
-
-### Backend
-
-Copy `server/.env.example` to `server/.env` and set:
-
-```env
-OPENAI_API_KEY=your_api_key_here
-OPENAI_CHAT_MODEL=gpt-4.1-mini
-OPENAI_EMBEDDING_MODEL=text-embedding-3-small
-PERSIST_DIR=./chroma_db
-```
-
-### Frontend
-
-Copy `frontend/.env.local.example` to `frontend/.env.local` and set:
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8000
-```
-
-## Local Run Without Docker
-
-### Backend
-
-```bash
-cd server
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app:app --reload
-```
-
-### Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-## Run With Docker Compose
-
-1. Create `server/.env` from `server/.env.example`
-2. Run:
-
-```bash
-docker compose up --build
-```
-
-Services:
-- Frontend: `http://localhost:3000`
-- Backend: `http://localhost:8000`
-
-## Notes
-
-- The backend stores Chroma data in a named Docker volume when run through Compose.
-- The frontend container uses `NEXT_PUBLIC_API_URL=http://localhost:8000` inside the Docker network.
-- This repository is being productionized incrementally, with observability and deployment maturity added in phases.
+#### Infra / Ops
+- Docker
+- GitHub Actions CI
+- Cloud deployment workflow support

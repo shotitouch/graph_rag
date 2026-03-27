@@ -133,7 +133,7 @@ async def ask_question(request: ChatRequest):
         
         # 4. Return the result
         logger.info(
-            "event=request_completed route=ask thread_id=%s status=answered retry_count=%s sources_count=%s",
+            "event=request_completed route=ask thread_id=%s request_id=%s status=answered retry_count=%s sources_count=%s",
             request.thread_id,
             request_id,
             retries,

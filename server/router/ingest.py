@@ -5,7 +5,7 @@ from fastapi import APIRouter, UploadFile, HTTPException, status
 from tempfile import NamedTemporaryFile
 from langchain_community.document_loaders import PyPDFLoader
 
-from core.retriever import vectorstore   # global Chroma instance
+from core.retriever import vectorstore
 from utils.text_splitter import split_text
 
 router = APIRouter(prefix="/ingest")
@@ -73,10 +73,7 @@ async def ingest_pdf(file: UploadFile):
             metadatas=metadatas
         )
 
-        # 5. Persist to disk
-        # vectorstore.persist()
-
-        # 6. Return summary
+        # 5. Return summary
         return {
             "message": f"{file.filename} ingested successfully",
             "pages": len(pages),
