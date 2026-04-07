@@ -18,6 +18,15 @@ class MiniLMReranker:
             print("---RERANKER ACTIVE---")
         return self.model
 
+    def preload(self):
+        try:
+            self._get_model()
+        except Exception:
+            self.status = "inactive"
+            if not self._logged_unavailable:
+                print("---RERANKER PRELOAD FAILED: FALLING BACK TO RETRIEVAL ORDER---")
+                self._logged_unavailable = True
+
     async def rerank(self, query, docs):
         """
         docs: list of langchain Document objects
