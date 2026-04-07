@@ -14,7 +14,7 @@ export async function ingestPDF(file: File) {
 }
 
 export async function askQuestion(sessionId: string, question: string) {
-  const res = await fetch(`${API_BASE}/ask`, {
+  const res = await fetch(`${API_BASE}/ask/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
