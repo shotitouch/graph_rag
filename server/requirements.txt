@@ -14,6 +14,7 @@ langgraph
 qdrant-client==1.11.1
 python-dotenv==1.2.1
 pypdf==6.4.0
+unstructured[pdf]
 fastapi==0.123.0
 uvicorn==0.38.0
 

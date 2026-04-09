@@ -7,6 +7,7 @@ import { ArrowLeft, Upload, FileText, CheckCircle2, AlertCircle, Loader2, Messag
 
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
+  const [mode, setMode] = useState<"fast" | "full">("fast");
   const [status, setStatus] = useState<"idle" | "uploading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
 
@@ -23,16 +24,22 @@ export default function UploadPage() {
     }
 
     setStatus("uploading");
-    setMessage("Processing document chunks and generating embeddings...");
+    setMessage(
+      mode === "fast"
+        ? "Running fast filing ingestion with text and metadata extraction..."
+        : "Running full filing ingestion with multimodal extraction and indexing..."
+    );
 
     try {
-      await ingestPDF(file);
+      await ingestPDF(file, mode);
       setStatus("success");
       setMessage("Document successfully indexed. You can now chat with it.");
     } catch (err) {
       setStatus("error");
-      console.error(err)
-      setMessage("Server memory limit reached or connection lost. Try a smaller PDF.");
+      console.error(err);
+      setMessage(
+        err instanceof Error ? err.message : "Document ingestion failed."
+      );
     }
   }
 
@@ -43,11 +50,11 @@ export default function UploadPage() {
           <Link href="/" className="flex items-center gap-2 text-zinc-500 hover:text-blue-500 transition-colors mb-4">
             <ArrowLeft className="w-4 h-4" /> <span>Back to Dashboard</span>
           </Link>
-          <h1 className="text-4xl font-extrabold text-gradient">Knowledge Ingestion</h1>
-          <p className="text-zinc-500 mt-2">Upload your PDF to expand the assistant&apos;s context.</p>
+          <h1 className="text-4xl font-extrabold text-gradient">Filing Ingestion</h1>
+          <p className="text-zinc-500 mt-2">Upload a 10-Q or related financial filing to prepare it for grounded analysis.</p>
         </div>
         <Link href="/chat" className="flex items-center gap-2 px-5 py-2.5 bg-zinc-100 dark:bg-zinc-800 rounded-xl text-sm font-semibold hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all border border-zinc-200 dark:border-zinc-700">
-          <MessageSquare className="w-4 h-4 text-blue-500" /> Resume Chat
+          <MessageSquare className="w-4 h-4 text-blue-500" /> Open Analysis
         </Link>
       </header>
 
@@ -55,7 +62,7 @@ export default function UploadPage() {
       <div className="mb-8 p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex gap-3 items-center text-amber-700 dark:text-amber-500 text-sm">
         <Info className="w-5 h-5 flex-shrink-0" />
         <p>
-          <strong>Server Note:</strong> To maintain stability on free-tier RAM (512MB), uploads are restricted to <strong>text-based PDFs under 2MB</strong> (approx. 15-20 pages).
+          <strong>Processing Note:</strong> Financial filing ingestion can be resource-intensive. For local testing, use a manageable PDF size while parsing, indexing, and multimodal extraction are being tuned.
         </p>
       </div>
 
@@ -68,7 +75,7 @@ export default function UploadPage() {
 
         <label className="cursor-pointer text-center">
           <span className="block text-lg font-semibold">
-            {file ? file.name : "Select a PDF document"}
+            {file ? file.name : "Select a filing PDF"}
           </span>
           <span className="text-sm text-zinc-500 block mt-1">
             Max 2MB • Text-based PDF only
@@ -86,12 +93,43 @@ export default function UploadPage() {
           />
         </label>
 
+        <div className="mt-8 grid w-full max-w-2xl grid-cols-1 gap-4 md:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => setMode("fast")}
+            className={`rounded-2xl border p-5 text-left transition-all ${
+              mode === "fast"
+                ? "border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/10"
+                : "border-zinc-200 bg-white/40 hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900/40 dark:hover:border-zinc-700"
+            }`}
+          >
+            <div className="text-sm font-bold uppercase tracking-wider text-blue-500">Fast Analysis</div>
+            <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
+              Best for quick indexing and grounded Q&amp;A. Ingests filing text and metadata with lower processing time.
+            </p>
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("full")}
+            className={`rounded-2xl border p-5 text-left transition-all ${
+              mode === "full"
+                ? "border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/10"
+                : "border-zinc-200 bg-white/40 hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900/40 dark:hover:border-zinc-700"
+            }`}
+          >
+            <div className="text-sm font-bold uppercase tracking-wider text-blue-500">Full Analysis</div>
+            <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
+              Adds deeper table and chart extraction for richer multimodal retrieval, with longer processing time and higher compute cost.
+            </p>
+          </button>
+        </div>
+
         {file && status === "idle" && (
           <button
             onClick={handleUpload}
             className="mt-8 px-10 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/25"
           >
-            Start Ingestion
+            Start Filing Ingestion
           </button>
         )}
       </div>
@@ -117,7 +155,7 @@ export default function UploadPage() {
 
       {status === "success" && (
         <Link href="/chat" className="mt-6 flex items-center justify-center gap-2 p-4 bg-zinc-900 dark:bg-white dark:text-black text-white rounded-2xl font-bold hover:scale-[1.01] transition-transform shadow-xl">
-          <FileText className="w-4 h-4" /> Start Chatting with PDF
+          <FileText className="w-4 h-4" /> Open Filing Analysis
         </Link>
       )}
     </div>

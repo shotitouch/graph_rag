@@ -1,15 +1,32 @@
 import { API_BASE } from "@/config";
 
-export async function ingestPDF(file: File) {
+export async function ingestPDF(file: File, mode: "fast" | "full") {
   const form = new FormData();
   form.append("file", file);
+  form.append("mode", mode);
 
   const res = await fetch(`${API_BASE}/ingest/`, {
     method: "POST",
     body: form,
   });
 
-  if (!res.ok) throw new Error("Failed to upload PDF");
+  if (!res.ok) {
+    let errorMessage = "Failed to upload PDF";
+    try {
+      const errorBody = await res.json();
+      errorMessage = errorBody?.detail || errorBody?.message || errorMessage;
+    } catch {
+      try {
+        const errorText = await res.text();
+        if (errorText) {
+          errorMessage = errorText;
+        }
+      } catch {
+        // Fall back to the default message when the response body is unreadable.
+      }
+    }
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 

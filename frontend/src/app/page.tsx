@@ -8,11 +8,11 @@ export default function Home() {
       <section className="relative pt-20 pb-16 px-6 text-center overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(59,130,246,0.1),transparent)]" />
         <div className="relative max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-b from-zinc-900 to-zinc-500 dark:from-white dark:to-zinc-500">
-            PDF RAG Assistant
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.08] pb-2 mb-4 bg-clip-text text-transparent bg-gradient-to-b from-zinc-900 to-zinc-500 dark:from-white dark:to-zinc-500">
+            10-Q Filing Assistant
           </h1>
           <p className="text-lg md:text-xl text-zinc-600 dark:text-zinc-400 mb-10 max-w-2xl mx-auto leading-relaxed">
-            An advanced Agentic RAG pipeline designed to bridge the gap between static documents and intelligent conversation.
+            A professional financial document intelligence system for grounded question answering over SEC filings, built with agentic retrieval and source-aware generation.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -33,39 +33,38 @@ export default function Home() {
 
       {/* Bento Grid Features Section */}
       <section className="max-w-6xl mx-auto px-6 py-20">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-[200px]">
+        <div className="grid grid-cols-1 gap-4 auto-rows-auto md:grid-cols-3 md:auto-rows-[220px]">
           {/* Main Core Skill */}
           {/* Increased width and height using col-span and row-span */}
-          <div className="md:col-span-2 md:row-span-2 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 p-8 transition-all hover:border-blue-500/50 bento-hover flex flex-col justify-between">
+          <div className="rounded-3xl border border-zinc-200 bg-zinc-50/50 p-6 transition-all hover:border-blue-500/50 bento-hover flex flex-col justify-between dark:border-zinc-800 dark:bg-zinc-900/50 md:col-span-2 md:row-span-2 md:p-8">
             <div>
               <div className="mb-6 w-14 h-14 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600">
                 <Cpu className="w-8 h-8" />
               </div>
               
               <h3 className="text-2xl font-bold mb-4 text-zinc-900 dark:text-zinc-100">
-                Agentic Orchestration
+                Agentic Financial Analysis
               </h3>
               
               <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed mb-6">
-                Leveraging 5.5 years of backend expertise  to move beyond simple chains. 
-                I implement <strong>cyclic cognitive architectures</strong> using LangGraph for 
-                self-correcting RAG loops and stateful multi-agent coordination.
+                Built on 5.5+ years of backend engineering experience, this system goes beyond simple prompt chains.
+                It uses <strong>graph-based orchestration</strong> to support grounded retrieval, structured reasoning, and source-aware financial analysis across long-form filings.
               </p>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="p-4 rounded-2xl bg-white/50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-700">
                   <span className="block text-xs font-bold uppercase tracking-wider text-indigo-500 mb-1">Logic</span>
-                  <span className="text-xs text-zinc-600 dark:text-zinc-300">Self-Correcting Loops</span>
+                  <span className="text-xs text-zinc-600 dark:text-zinc-300">Grounded Decision Flow</span>
                 </div>
                 <div className="p-4 rounded-2xl bg-white/50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-700">
                   <span className="block text-xs font-bold uppercase tracking-wider text-indigo-500 mb-1">Routing</span>
-                  <span className="text-xs text-zinc-600 dark:text-zinc-300">Intent-Driven Paths</span>
+                  <span className="text-xs text-zinc-600 dark:text-zinc-300">Question-Aware Retrieval</span>
                 </div>
               </div>
             </div>
 
-            <div className="mt-8 pt-6 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
-              <span className="text-xs font-medium text-zinc-400">Powered by LangGraph & FastAPI</span>
+            <div className="mt-8 pt-6 border-t border-zinc-100 dark:border-zinc-800 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <span className="text-xs font-medium text-zinc-400">Powered by LangGraph, FastAPI, and Qdrant</span>
               <div className="flex -space-x-2">
                 {/* Visual indicator of "Agentic" complexity */}
                 <div className="w-6 h-6 rounded-full bg-blue-500 border-2 border-white dark:border-zinc-900" />
@@ -76,24 +75,23 @@ export default function Home() {
           </div>
 
           {/* About Me */}
-          <div className="md:row-span-2 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 p-8 transition-all hover:border-blue-500/50">
+          <div className="rounded-3xl border border-zinc-200 bg-zinc-50/50 p-6 transition-all hover:border-blue-500/50 dark:border-zinc-800 dark:bg-zinc-900/50 md:row-span-2 md:p-8">
             <div className="mb-4 w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
               <User className="w-6 h-6" />
             </div>
-            <h3 className="text-xl font-bold mb-2 text-zinc-900 dark:text-zinc-100">Shotitouch T.</h3>
+            <h3 className="text-xl font-bold mb-2 text-zinc-900 dark:text-zinc-100">Project Overview</h3>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
-              <strong>ML Graduate Student at Stevens (GPA 4.0)</strong> and former <strong>Full-Stack Co-founder</strong> with 5.5+ years of experience. 
-              I specialize in architecting <strong>agentic GenAI systems</strong> and <strong>adversarial ML</strong>, 
-              bridging the gap between scalable enterprise backends and state-of-the-art AI research.
+              Designed as a finance-focused GenAI application for exploring <strong>10-Q filings</strong> through grounded Q&A.
+              The system supports narrative sections, financial tables, and filing-level metadata to help analyze company performance with verifiable sources.
             </p>
           </div>
 
           {/* Database */}
           <div className="rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 p-6 flex flex-col justify-center transition-all hover:border-blue-500/50">
             <div className="flex items-center gap-3 mb-2 font-bold">
-              <Database className="w-5 h-5 text-blue-500" /> ChromaDB
+              <Database className="w-5 h-5 text-blue-500" /> Qdrant
             </div>
-            <p className="text-xs text-zinc-500">Vector storage for high-performance semantic retrieval.</p>
+            <p className="text-xs text-zinc-500">Vector search infrastructure for filing retrieval, chunk metadata, and citation-aware responses.</p>
           </div>
 
           {/* FastAPI */}
@@ -101,7 +99,7 @@ export default function Home() {
             <div className="flex items-center gap-3 mb-2 font-bold">
               <FileText className="w-5 h-5 text-emerald-500" /> Next.js + FastAPI
             </div>
-            <p className="text-xs text-zinc-500">A seamless bridge between high-speed AI logic and reactive UI.</p>
+            <p className="text-xs text-zinc-500">A full-stack interface for ingestion, querying, and reviewing grounded answers over financial documents.</p>
           </div>
         </div>
       </section>

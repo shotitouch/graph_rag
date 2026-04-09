@@ -85,9 +85,9 @@ export default function ChatPage() {
         {messages.length === 0 && (
           <div className="h-full flex flex-col items-center justify-center text-center opacity-40">
             <Bot className="w-16 h-16 mb-4 text-blue-500" />
-            <h2 className="text-xl font-bold">Document Brain Active</h2>
+            <h2 className="text-xl font-bold">Filing Analysis Ready</h2>
             <p className="max-w-xs mx-auto mt-2 text-sm">
-              I am ready to answer questions based on your uploaded context. What would you like to know?
+              Ask about revenue, operating income, business segments, liquidity, or risks based on the uploaded filing.
             </p>
           </div>
         )}
@@ -137,6 +137,7 @@ export default function ChatPage() {
                      p-5 pr-16 rounded-2xl shadow-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/40 
                      transition-all text-sm group-hover:border-zinc-300 dark:group-hover:border-zinc-700"
           placeholder="Ask a question about the document..."
+          placeholder="Ask a question about the filing..."
           disabled={loading}
         />
         <button
