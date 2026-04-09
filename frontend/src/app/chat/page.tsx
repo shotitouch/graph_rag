@@ -136,7 +136,6 @@ export default function ChatPage() {
           className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 
                      p-5 pr-16 rounded-2xl shadow-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/40 
                      transition-all text-sm group-hover:border-zinc-300 dark:group-hover:border-zinc-700"
-          placeholder="Ask a question about the document..."
           placeholder="Ask a question about the filing..."
           disabled={loading}
         />
