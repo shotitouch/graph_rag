@@ -12,6 +12,33 @@ router_prompt = ChatPromptTemplate.from_messages([
     ("human", "{question}")
 ])
 
+query_analysis_prompt = ChatPromptTemplate.from_messages([
+    (
+        "system",
+        "You analyze technical questions for a grounded SEC 10-Q filing assistant. "
+        "Extract structured query information only. Do not answer the question.\n\n"
+        "Return:\n"
+        "- question_type: one of fact_lookup, metric_lookup, performance_summary, risk_or_disclosure, general_technical\n"
+        "- scope_type: one of current_filing, single_company, multi_company_comparison, market_wide, aggregate, unknown\n"
+        "- query_tickers: uppercase ticker symbols explicitly mentioned or clearly implied by a well-known company name\n"
+        "- query_year: explicit year if requested, otherwise null\n"
+        "- query_period: only Q1, Q2, or Q3 if explicitly requested, otherwise null\n"
+        "- multi_question: true only if the user asks multiple distinct filing questions\n"
+        "- focus_terms: a short list of high-signal financial search terms or segment names\n\n"
+        "Guidance:\n"
+        "- Use safe company-to-ticker mappings only when unambiguous.\n"
+        "- Microsoft -> MSFT, Nvidia -> NVDA, Apple -> AAPL.\n"
+        "- Google or Alphabet -> GOOG and GOOGL.\n"
+        "- Do not guess a ticker if the company is unclear.\n"
+        "- Use current_filing when the user refers implicitly to the active filing without naming a company.\n"
+        "- Use multi_company_comparison only for bounded comparisons between specific companies.\n"
+        "- Use market_wide for ranking or market-level questions like 'top companies' or 'most profitable companies'.\n"
+        "- Use aggregate for questions asking for averages, totals, medians, or other rolled-up statistics across companies.\n"
+        "- Keep focus_terms concise and useful for retrieval."
+    ),
+    ("human", "{question}"),
+])
+
 prompt = ChatPromptTemplate.from_messages([
     (
         "system",

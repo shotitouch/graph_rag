@@ -15,3 +15,10 @@ class AgentState(TypedDict):
     is_grounded: str  # 'yes' or 'no'
     is_useful: str    # 'yes' or 'no'
     sources: List[dict[str, Any]]
+    question_type: str
+    scope_type: str
+    query_tickers: List[str]
+    query_year: int | None
+    query_period: str
+    multi_question: bool
+    focus_terms: List[str]

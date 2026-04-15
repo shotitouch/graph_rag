@@ -1,17 +1,68 @@
 "use client";
 
-import Link from 'next/link';
-import { useState } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import { ingestPDF } from "@/lib/api";
-import { ArrowLeft, Upload, FileText, CheckCircle2, AlertCircle, Loader2, MessageSquare, Info } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowLeft,
+  CheckCircle2,
+  FileText,
+  Info,
+  Loader2,
+  MessageSquare,
+  Upload,
+} from "lucide-react";
+
+function getProgressMessage(mode: "fast" | "full", progress: number) {
+  if (mode === "fast") {
+    if (progress < 20) return "Uploading filing and preparing text extraction...";
+    if (progress < 45) return "Extracting filing text and cover-page metadata...";
+    if (progress < 75) return "Chunking narrative sections for retrieval...";
+    return "Indexing filing chunks for grounded analysis...";
+  }
+
+  if (progress < 15) return "Uploading filing and preparing multimodal parsing...";
+  if (progress < 35) return "Parsing document layout, tables, and narrative blocks...";
+  if (progress < 65) return "Extracting financial tables and chart context...";
+  if (progress < 85) return "Summarizing multimodal elements for retrieval...";
+  return "Indexing filing content for grounded analysis...";
+}
 
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [mode, setMode] = useState<"fast" | "full">("fast");
   const [status, setStatus] = useState<"idle" | "uploading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [progress, setProgress] = useState(0);
 
   const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB Limit for 512MB RAM stability
+
+  useEffect(() => {
+    if (status !== "uploading") {
+      return;
+    }
+
+    const ceiling = mode === "fast" ? 92 : 88;
+    const interval = window.setInterval(() => {
+      setProgress((current) => {
+        if (current >= ceiling) {
+          return current;
+        }
+
+        const increment =
+          current < 20 ? 8 :
+          current < 45 ? 6 :
+          current < 70 ? 4 :
+          current < 82 ? 2 :
+          1;
+
+        return Math.min(current + increment, ceiling);
+      });
+    }, mode === "fast" ? 700 : 1100);
+
+    return () => window.clearInterval(interval);
+  }, [mode, status]);
 
   async function handleUpload() {
     if (!file) return;
@@ -24,17 +75,18 @@ export default function UploadPage() {
     }
 
     setStatus("uploading");
-    setMessage(
-      mode === "fast"
-        ? "Running fast filing ingestion with text and metadata extraction..."
-        : "Running full filing ingestion with multimodal extraction and indexing..."
-    );
+    setProgress(6);
+    setMessage("");
 
     try {
-      await ingestPDF(file, mode);
+      const result = await ingestPDF(file, mode);
+      setProgress(100);
       setStatus("success");
-      setMessage("Document successfully indexed. You can now chat with it.");
+      setMessage(
+        `Document successfully indexed${result?.ticker && result.ticker !== "UNKNOWN" ? ` for ${result.ticker}` : ""}. You can now chat with it.`
+      );
     } catch (err) {
+      setProgress(0);
       setStatus("error");
       console.error(err);
       setMessage(
@@ -42,6 +94,11 @@ export default function UploadPage() {
       );
     }
   }
+
+  const displayMessage =
+    status === "uploading"
+      ? getProgressMessage(mode, progress)
+      : message;
 
   return (
     <div className="min-h-screen max-w-4xl mx-auto px-4 py-12 flex flex-col">
@@ -58,7 +115,6 @@ export default function UploadPage() {
         </Link>
       </header>
 
-      {/* Recruiter Notice / Memory Guard */}
       <div className="mb-8 p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex gap-3 items-center text-amber-700 dark:text-amber-500 text-sm">
         <Info className="w-5 h-5 flex-shrink-0" />
         <p>
@@ -66,9 +122,9 @@ export default function UploadPage() {
         </p>
       </div>
 
-      <div className={`glass-card rounded-3xl p-10 flex flex-col items-center border-2 border-dashed transition-all
-        ${file ? "border-blue-500/50 bg-blue-500/5" : "border-zinc-200 dark:border-zinc-800"}`}>
-        
+      <div className={`glass-card rounded-3xl p-10 flex flex-col items-center border-2 border-dashed transition-all ${
+        file ? "border-blue-500/50 bg-blue-500/5" : "border-zinc-200 dark:border-zinc-800"
+      }`}>
         <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-600 mb-6">
           <Upload className="w-8 h-8" />
         </div>
@@ -78,17 +134,18 @@ export default function UploadPage() {
             {file ? file.name : "Select a filing PDF"}
           </span>
           <span className="text-sm text-zinc-500 block mt-1">
-            Max 2MB • Text-based PDF only
+            Max 2MB &bull; Text-based PDF only
           </span>
           <input
             type="file"
             accept="application/pdf"
             className="hidden"
             onChange={(e) => {
-                const selectedFile = e.target.files?.[0] || null;
-                setFile(selectedFile);
-                setStatus("idle");
-                setMessage("");
+              const selectedFile = e.target.files?.[0] || null;
+              setFile(selectedFile);
+              setStatus("idle");
+              setMessage("");
+              setProgress(0);
             }}
           />
         </label>
@@ -135,20 +192,34 @@ export default function UploadPage() {
       </div>
 
       {status !== "idle" && (
-        <div className={`mt-8 p-6 rounded-2xl flex gap-4 items-start animate-in fade-in slide-in-from-top-4 
-          ${status === "uploading" ? "bg-zinc-100 dark:bg-zinc-900" : 
-            status === "success" ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20" : 
-            "bg-red-500/10 text-red-600 border border-red-500/20"}`}
-        >
+        <div className={`mt-8 p-6 rounded-2xl flex gap-4 items-start animate-in fade-in slide-in-from-top-4 ${
+          status === "uploading" ? "bg-zinc-100 dark:bg-zinc-900" :
+            status === "success" ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20" :
+            "bg-red-500/10 text-red-600 border border-red-500/20"
+        }`}>
           {status === "uploading" && <Loader2 className="w-5 h-5 animate-spin mt-0.5" />}
           {status === "success" && <CheckCircle2 className="w-5 h-5 mt-0.5" />}
           {status === "error" && <AlertCircle className="w-5 h-5 mt-0.5" />}
-          
-          <div>
+
+          <div className="w-full">
             <h3 className="font-bold text-sm uppercase tracking-wider">
               {status === "uploading" ? "System Processing" : status === "success" ? "Upload Complete" : "Error"}
             </h3>
-            <p className="text-sm opacity-80 mt-1">{message}</p>
+            <p className="text-sm opacity-80 mt-1">{displayMessage}</p>
+            {status === "uploading" && (
+              <div className="mt-4 w-full max-w-xl">
+                <div className="mb-2 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">
+                  <span>{mode === "fast" ? "Fast Mode" : "Full Mode"}</span>
+                  <span>{progress}%</span>
+                </div>
+                <div className="h-2.5 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
+                  <div
+                    className="h-full rounded-full bg-blue-600 transition-[width] duration-500 ease-out"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
