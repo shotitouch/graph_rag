@@ -1,51 +1,204 @@
-## Agentic Graph PDF RAG
+# 📊 10-Q AI Financial Filing Assistant
 
-A full-stack **agentic Retrieval-Augmented Generation (RAG)** system for grounded question answering over uploaded PDF documents. Built with **LangGraph**, **FastAPI**, **Next.js**, **Qdrant**, and a reranking layer, the system combines retrieval, query rewriting, citation-aware generation, and validation loops to improve answer quality and reduce unsupported responses.
+A production-grade full-stack AI system for **grounded question answering over SEC 10-Q filings**, designed with a focus on **reliability, validation, and controlled AI behavior**.
 
-This project demonstrates practical **AI systems engineering** through **agentic orchestration**, **multi-stage retrieval**, **structured observability**, **CI**, and a **deployment-oriented architecture**. It is designed as a production-minded LLM application rather than a simple chatbot demo, with emphasis on grounded answers, traceable behavior, and reliability-aware control flow.
+Unlike typical RAG demos, this system enforces **source grounding, scope validation, and fail-closed responses** to reduce hallucinations in financial analysis.
 
-### Features
+---
 
-#### Agentic Intelligence
-- LangGraph-based stateful workflow orchestration
-- Query rewriting and retry loops for weak retrieval cases
-- Hallucination and answer-quality grading
-- Intent-based routing between conversational and document-grounded paths
+## 🚀 Overview
 
-#### Retrieval and Grounding
-- Dense retrieval over **Qdrant**
-- Cross-encoder reranking for improved context precision
-- Citation-aware answer generation
-- Fail-closed response behavior for unsupported answers
+This system allows users to upload a company’s 10-Q filing and ask questions such as:
 
-#### Backend
-- FastAPI service for ingestion and question answering
-- Structured JSON responses with sources
-- Structured logging, request tracing, and per-node latency instrumentation
-- Dockerized backend with CI-based validation
+- What was revenue this quarter?
+- What risks were mentioned?
+- What was operating income?
+- How did the company perform financially?
 
-#### Frontend
-- Next.js interface for PDF upload and chat
-- Source-aware responses with citations
-- TypeScript-based client application
+The system answers **only from the uploaded document** and provides **page-level citations**.
 
-### Tech Stack
+---
 
-#### Backend
-- Python
-- FastAPI
-- LangGraph
-- LangChain (LCEL)
-- Qdrant
-- Reranker / sentence-transformers
-- OpenAI-compatible chat and embedding APIs
+## 🧠 Key Features
 
-#### Frontend
-- Next.js
-- TypeScript
-- React
+### ✅ Grounded AI Answers
+- Retrieval-based answers strictly from uploaded filings  
+- Source citations (page-level)  
+- No external or fabricated knowledge  
 
-#### Infra / Ops
-- Docker
-- GitHub Actions CI
-- Cloud deployment workflow support
+### 🧩 Agentic RAG Architecture
+- Graph-based orchestration using LangGraph  
+- Multi-step pipeline instead of single prompt  
+- Includes:
+  - retrieval
+  - reranking
+  - answer generation
+  - hallucination detection
+  - answer validation
+  - retry / correction loops  
+
+### 🛡️ Reliability & Safety Design
+- Fail-closed behavior (refuses when evidence is insufficient)  
+- Metadata-aware retrieval (ticker / period / scope)  
+- Prevents wrong-company answers  
+- Controlled LLM usage with deterministic components  
+
+### 📄 Multimodal 10-Q Ingestion
+- Parses text, tables, and charts from filings  
+- Extracts metadata (ticker, year, quarter)  
+- Converts charts/images into retrievable text summaries  
+
+### ⚡ Performance Optimization
+- Cross-encoder reranker for improved retrieval quality  
+- Preloaded models to reduce first-query latency  
+- Fast vs Full ingestion modes for cost/performance tradeoff  
+
+---
+
+## 🏗️ Architecture
+
+The system is built as a **graph-based AI pipeline**:
+
+User Query
+↓
+Query Routing
+↓
+Vector Retrieval (Qdrant)
+↓
+Reranking (Cross-Encoder)
+↓
+Answer Generation (LLM)
+↓
+Validation & Guardrails
+↓
+Final Answer (with citations OR refusal)
+
+
+This design emphasizes **control over LLM behavior**, not just generation.
+
+---
+
+## 📥 Ingestion Pipeline
+
+### Processing Steps:
+- PDF upload → parsing → chunking  
+- Metadata extraction (regex-first, LLM fallback)  
+- Multimodal handling:
+  - text
+  - tables
+  - charts/images → summarized into text  
+
+### Stored Data Includes:
+- ticker / year / quarter  
+- page number  
+- content type (text, table, image)  
+- chunk relationships  
+
+---
+
+## 🔍 Retrieval System
+
+- Vector DB: **Qdrant**
+- Embeddings: sentence-transformers  
+- Reranker: `cross-encoder/ms-marco-MiniLM-L-6-v2`  
+
+Enhancements:
+- Reranker preloaded at startup (reduces latency)
+- Metadata filtering for scoped retrieval
+
+---
+
+## 🧪 Reliability Focus (Core Differentiator)
+
+This project is designed around **AI system correctness**, not just functionality.
+
+Key design decisions:
+- Regex-first metadata extraction → reduces LLM errors  
+- Source-aware generation → prevents hallucination  
+- Explicit refusal when unsupported  
+- Validation layers after generation  
+- Scope-aware query handling (company / period)
+
+---
+
+## 🖥️ Tech Stack
+
+### Backend
+- Python, FastAPI  
+- LangGraph, LangChain  
+- OpenAI API  
+- Qdrant  
+- sentence-transformers + cross-encoder  
+- unstructured (PDF parsing)  
+
+### Frontend
+- Next.js, React, TypeScript  
+- Custom upload + chat UI  
+
+### Infra / Deployment
+- AWS ECS (Fargate), ECR  
+- Application Load Balancer  
+- CloudWatch, ACM  
+- Cloudflare DNS  
+- Vercel (frontend)  
+
+---
+
+## ⚙️ Deployment
+
+- Backend: Dockerized → AWS ECS/Fargate  
+- Frontend: Vercel  
+- Secure HTTPS API via ALB + ACM  
+- CI enabled (CD in progress)
+
+---
+
+## 🎯 What This Project Demonstrates
+
+- Full-stack AI product development  
+- Agentic RAG system design  
+- Multimodal document processing  
+- Vector search + reranking  
+- LLM reliability engineering  
+- Production deployment on AWS  
+
+---
+
+## 🚧 Current Status
+
+The system is fully functional and deployed.
+
+### Next Improvements
+- Structured query analysis (intent + scope detection)  
+- Stronger company/ticker validation  
+- Better multi-company comparison handling  
+- Enhanced rejection of unsupported financial queries  
+
+---
+
+## 📌 Positioning
+
+This project is best understood as:
+
+- **AI Engineer / GenAI Systems**
+- **LLM + RAG + Agentic Pipeline**
+- **Reliable AI System Design**
+
+Not focused on:
+- Pure model training
+- Traditional ML pipelines
+- Quantitative finance modeling
+
+---
+
+## 🔗 Demo & Repository
+
+GitHub: https://github.com/shotitouch  
+Live Demo: https://shotitouch-pdf-rag.vercel.app
+
+---
+
+## 👤 Author
+
+Shotitouch Tuangcharoentip  
+AI / Software Engineer | MS Machine Learning (Stevens Institute of Technology)
