@@ -1,4 +1,4 @@
-# 📊 10-Q AI Financial Filing Assistant
+# 📊 Multimodal 10-Q Financial Doc Q&A System
 
 A production-grade full-stack AI system for **grounded question answering over SEC 10-Q filings**, designed with a focus on **reliability, validation, and controlled AI behavior**.
 
