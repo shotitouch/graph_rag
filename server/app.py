@@ -1,6 +1,6 @@
 import uvicorn
 from fastapi import FastAPI
-from core.retriever import reranker
+from core.retriever import ensure_qdrant_collection, reranker
 from router.ask import router as ask_router
 from router.health import router as health_router
 from router.ingest import router as ingest_router
@@ -30,6 +30,9 @@ app.include_router(ingest_router)
 
 @app.on_event("startup")
 async def preload_models():
+    logger.info("event=startup_preload component=qdrant_collection status=starting")
+    ensure_qdrant_collection()
+    logger.info("event=startup_preload component=qdrant_collection status=ready")
     logger.info("event=startup_preload component=reranker status=starting")
     reranker.preload()
     logger.info("event=startup_preload component=reranker status=%s", reranker.status.lower())

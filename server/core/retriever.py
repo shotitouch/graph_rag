@@ -13,16 +13,44 @@ qdrant_client = QdrantClient(
     api_key=QDRANT_API_KEY,
 )
 
-existing_collections = {
-    collection.name for collection in qdrant_client.get_collections().collections
-}
+def _collection_exists(collection_name: str) -> bool:
+    existing_collections = {
+        collection.name for collection in qdrant_client.get_collections().collections
+    }
+    return collection_name in existing_collections
 
-if QDRANT_COLLECTION not in existing_collections:
-    embedding_dimension = len(embeddings.embed_query("dimension probe"))
-    qdrant_client.create_collection(
-        collection_name=QDRANT_COLLECTION,
-        vectors_config=VectorParams(size=embedding_dimension, distance=Distance.COSINE),
+
+def ensure_qdrant_collection() -> None:
+    if _collection_exists(QDRANT_COLLECTION):
+        return
+
+    logger.info(
+        "event=qdrant_collection_create_started collection=%s",
+        QDRANT_COLLECTION,
     )
+    embedding_dimension = len(embeddings.embed_query("dimension probe"))
+
+    try:
+        qdrant_client.create_collection(
+            collection_name=QDRANT_COLLECTION,
+            vectors_config=VectorParams(
+                size=embedding_dimension,
+                distance=Distance.COSINE,
+            ),
+        )
+    except Exception:
+        if not _collection_exists(QDRANT_COLLECTION):
+            logger.exception(
+                "event=qdrant_collection_create_failed collection=%s",
+                QDRANT_COLLECTION,
+            )
+            raise
+    else:
+        logger.info(
+            "event=qdrant_collection_create_completed collection=%s size=%s",
+            QDRANT_COLLECTION,
+            embedding_dimension,
+        )
 
 vectorstore = QdrantVectorStore(
     client=qdrant_client,

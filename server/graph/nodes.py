@@ -326,8 +326,6 @@ async def answer_grader_node(state: AgentState) -> Dict[str, Any]:
         return {"is_useful": "no", "documents": []}
     
     try:
-        # 1. Run the Answer Grader Chain
-        # Note: You'll need get_answer_grader_chain in core/chain.py
         grader_chain = get_answer_grader_chain()
         res = await grader_chain.ainvoke({
             "question": question, 

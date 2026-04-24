@@ -8,7 +8,7 @@ from fastapi import APIRouter, Form, HTTPException, UploadFile, status
 from pypdf import PdfReader
 from unstructured.partition.pdf import partition_pdf
 
-from core.retriever import vectorstore
+from core.retriever import ensure_qdrant_collection, vectorstore
 from utils.logger import get_logger
 from utils.text_splitter import split_text
 from utils.extractors.tenq_metadata import (
@@ -156,6 +156,7 @@ async def ingest_10q_fast(file: UploadFile, pdf_path: str) -> dict:
         parent_id,
         len(texts),
     )
+    ensure_qdrant_collection()
     await vectorstore.aadd_texts(
         texts=texts,
         metadatas=metadatas,
@@ -324,6 +325,7 @@ async def ingest_10q_full(file: UploadFile, pdf_path: str) -> dict:
         parent_id,
         len(texts),
     )
+    ensure_qdrant_collection()
     await vectorstore.aadd_texts(
         texts=texts,
         metadatas=metadatas,
