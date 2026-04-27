@@ -27,7 +27,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Validate backend Python files
-        run: python -m py_compile app.py config.py core/*.py graph/*.py router/*.py utils/*.py
+        run: python -m py_compile app.py ask/*.py workflow/*.py retrieval/*.py ingestion/*.py filing_metadata/*.py llm_runtime/*.py shared/*.py health/*.py
 
   frontend:
     runs-on: ubuntu-latest
